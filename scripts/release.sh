@@ -35,7 +35,7 @@ case "${1:-prepare}" in
     python3 "$ROOT/scripts/even-minute.py"
     gh release create "v$VERSION" "$DIST/Light.zip" "$DIST/appcast.xml" "$DIST/SHA256SUMS" \
       --repo "$REPO" --target "$(git -C "$ROOT" rev-parse HEAD)" --title "$VERSION" \
-      --notes-file "$ROOT/docs/release-notes.md"
+      --notes ""
     ;;
   *) echo 'usage: release.sh prepare|publish' >&2; exit 64 ;;
 esac

@@ -7,4 +7,4 @@ if [[ $# == 0 ]]; then
 else
   SOURCE="$1"
 fi
-exec "$ROOT/site/install.sh" --bundle "$SOURCE"
+exec "$ROOT/scripts/install-bundle.sh" --bundle "$SOURCE"

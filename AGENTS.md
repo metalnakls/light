@@ -14,4 +14,4 @@ The dot hides only after macOS reports disconnection. Clicking it requests disco
 
 ## Releases
 
-Read `docs/releases.md` when changing build, install, update, version, or publication behavior. Keep one version for the entire pending release. Update checks and automatic downloads default to enabled; preserve the user's later preference. Keep signing keys in Keychain, never in the repository.
+Keep one version for the entire pending release. Update checks and automatic downloads default to enabled; preserve the user's later preference. Keep signing keys in Keychain, never in the repository.
