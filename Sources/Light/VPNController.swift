@@ -123,23 +123,6 @@ final class VPNController: ObservableObject {
         onChange?()
     }
 
-    var interfaceName: String? {
-        guard let connection, state == .connected,
-              let status = SCNetworkConnectionCopyExtendedStatus(connection) as? [String: Any] else { return nil }
-        for key in ["IPv4", "IPv6", "VPN"] {
-            if let value = (status[key] as? [String: Any])?["InterfaceName"] as? String { return value }
-        }
-        if let name = status["InterfaceName"] as? String { return name }
-        if let store = SCDynamicStoreCreate(nil, "Light" as CFString, nil, nil) {
-            for family in ["IPv4", "IPv6"] {
-                let key = "State:/Network/Service/\(selectedID)/\(family)" as CFString
-                if let value = SCDynamicStoreCopyValue(store, key) as? [String: Any],
-                   let name = value["InterfaceName"] as? String { return name }
-            }
-        }
-        return nil
-    }
-
     func openShadowrocket() {
         guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.liguangming.Shadowrocket") else {
             error = "Shadowrocket is not installed. Install and configure it before using Light."

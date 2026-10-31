@@ -6,9 +6,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let vpn = VPNController()
     private var statusItem: NSStatusItem!
     private let indicator = Indicator()
-    private let health = TunnelHealth()
     private var appearanceTimer: Timer?
-    private lazy var settings = SettingsWindowController(vpn: vpn, health: health)
+    private lazy var settings = SettingsWindowController(vpn: vpn)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -20,12 +19,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             button.action = #selector(clicked)
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         }
-        vpn.onChange = { [weak self] in
-            guard let self else { return }
-            self.health.update(vpn: self.vpn)
-            self.updateStatus()
-        }
-        health.onChange = { [weak self] in self?.updateStatus() }
+        vpn.onChange = { [weak self] in self?.updateStatus() }
         NSAppleEventManager.shared().setEventHandler(self, andSelector: #selector(handleURL(event:replyEvent:)),
             forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
         Hotkeys.shared.onToggle = { [weak self] in self?.vpn.toggle() }
@@ -34,7 +28,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         appearanceTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 guard let self else { return }
-                self.health.update(vpn: self.vpn)
                 guard self.statusItem.isVisible else { return }
                 await self.indicator.sample(near: self.statusItem.button)
                 self.updateStatus()
@@ -75,8 +68,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func updateStatus() {
         statusItem.isVisible = vpn.state != .disconnected && vpn.state != .unavailable
-        statusItem.button?.image = indicator.image(failed: vpn.state == .failed || health.failed, transitioning: vpn.state == .connecting || vpn.state == .disconnecting)
-        statusItem.button?.toolTip = vpn.error ?? (vpn.state == .connected ? health.detail : vpn.state.description)
+        statusItem.button?.image = indicator.image(failed: vpn.state == .failed, transitioning: vpn.state == .connecting || vpn.state == .disconnecting)
+        statusItem.button?.toolTip = vpn.error ?? vpn.state.description
         statusItem.button?.setAccessibilityLabel("VPN: \(vpn.state.description). Click to disconnect; right-click for settings.")
     }
 }

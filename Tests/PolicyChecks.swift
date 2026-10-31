@@ -4,21 +4,6 @@ import Carbon.HIToolbox
 @main
 struct PolicyChecks {
     @MainActor static func main() {
-        var health = HealthEvidence()
-        precondition(!health.failed)
-        health.record(false)
-        health.record(false)
-        precondition(!health.failed, "One or two failures must not report a dead tunnel")
-        health.record(false)
-        precondition(health.failed, "Three failed rounds must report a failure")
-        health.record(true)
-        precondition(!health.failed, "One successful round must recover")
-        health.record(false)
-        health.record(nil)
-        health.record(false)
-        health.record(false)
-        precondition(!health.failed, "Inconclusive evidence breaks a failure streak")
-
         precondition(Indicator.isYellow(hue: 0.15, saturation: 0.8, brightness: 0.9))
         precondition(!Indicator.isYellow(hue: 0.15, saturation: 0.1, brightness: 0.9), "Neutral backgrounds stay yellow")
         precondition(!Indicator.isYellow(hue: 0.15, saturation: 0.8, brightness: 0.2), "Dark backgrounds stay yellow")
@@ -27,6 +12,6 @@ struct PolicyChecks {
         precondition(KeyCombination.toggle.modifiers == UInt32(cmdKey | optionKey | controlKey))
         precondition(KeyCombination.open.modifiers == UInt32(cmdKey | optionKey | controlKey | shiftKey))
         precondition(KeyCombination.open != KeyCombination.toggle)
-        print("Passed: conservative health, recovery, unknown state, contrast, and default hotkeys")
+        print("Passed: contrast and default hotkeys")
     }
 }
