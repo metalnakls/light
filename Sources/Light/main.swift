@@ -5,6 +5,7 @@ import Foundation
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let vpn = VPNController()
     private var statusItem: NSStatusItem!
+    private lazy var settings = SettingsWindowController(vpn: vpn)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -19,6 +20,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSAppleEventManager.shared().setEventHandler(self, andSelector: #selector(handleURL(event:replyEvent:)),
             forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
         updateStatus()
+        if !UserDefaults.standard.bool(forKey: "hasOpenedSettings") { showSettings() }
     }
 
     @objc private func clicked() {
@@ -28,10 +30,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func showSettings() {
-        let alert = NSAlert()
-        alert.messageText = "Light"
-        alert.informativeText = vpn.error ?? vpn.state.description
-        alert.runModal()
+        UserDefaults.standard.set(true, forKey: "hasOpenedSettings")
+        settings.showWindow(nil)
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
