@@ -5,6 +5,8 @@ import Foundation
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let vpn = VPNController()
     private var statusItem: NSStatusItem!
+    private let indicator = Indicator()
+    private var appearanceTimer: Timer?
     private lazy var settings = SettingsWindowController(vpn: vpn)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -22,6 +24,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Hotkeys.shared.onToggle = { [weak self] in self?.vpn.toggle() }
         Hotkeys.shared.onOpen = { [weak self] in self?.vpn.openShadowrocket() }
         Hotkeys.shared.start()
+        appearanceTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                guard let self, self.statusItem.isVisible else { return }
+                await self.indicator.sample(near: self.statusItem.button)
+                self.updateStatus()
+            }
+        }
         updateStatus()
         if !UserDefaults.standard.bool(forKey: "hasOpenedSettings") { showSettings() }
     }
@@ -57,7 +66,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func updateStatus() {
         statusItem.isVisible = vpn.state != .disconnected && vpn.state != .unavailable
-        statusItem.button?.image = LightIcon.make(color: vpn.state == .failed ? .systemRed : .systemYellow)
+        statusItem.button?.image = indicator.image(failed: vpn.state == .failed, transitioning: vpn.state == .connecting || vpn.state == .disconnecting)
         statusItem.button?.toolTip = vpn.error ?? vpn.state.description
         statusItem.button?.setAccessibilityLabel("VPN: \(vpn.state.description). Click to disconnect; right-click for settings.")
     }
@@ -73,14 +82,3 @@ enum LightApp {
     }
 }
 
-enum LightIcon {
-    static func make(color: NSColor) -> NSImage {
-        let image = NSImage(size: NSSize(width: 18, height: 18))
-        image.lockFocus()
-        color.setFill()
-        NSBezierPath(ovalIn: NSRect(x: 5, y: 5, width: 8, height: 8)).fill()
-        image.unlockFocus()
-        image.isTemplate = false
-        return image
-    }
-}

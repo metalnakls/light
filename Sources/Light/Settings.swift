@@ -45,6 +45,8 @@ struct SettingsView: View {
     @State private var history: [SettingsTab] = [.connection]
     @State private var historyIndex = 0
     @State private var navigating = false
+    @AppStorage("adaptiveColor") private var adaptiveColor = false
+    @State private var captureAllowed = CGPreflightScreenCaptureAccess()
     @AppStorage("indicatorColor") private var indicatorColor = "yellow"
 
     var body: some View {
@@ -136,6 +138,18 @@ struct SettingsView: View {
             Picker("Connected color", selection: $indicatorColor) {
                 Text("Yellow").tag("yellow")
                 Text("White").tag("white")
+            }
+            if #available(macOS 14, *) {
+                Toggle("Use white on yellow backgrounds", isOn: $adaptiveColor)
+                    .onChange(of: adaptiveColor) { enabled in
+                        if enabled { captureAllowed = CGPreflightScreenCaptureAccess() || CGRequestScreenCaptureAccess() }
+                    }
+                Text("Optional Screen Recording permission lets Light sample a tiny area beside its dot. No images are saved or sent anywhere.")
+                    .font(.caption).foregroundStyle(.secondary)
+                if adaptiveColor && !captureAllowed {
+                    Text("Allow Light in System Settings → Privacy & Security → Screen Recording, then reopen Light. You can also choose White above without permission.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
             }
             Text("The indicator has no shadow. A connection failure stays red.")
                 .font(.caption).foregroundStyle(.secondary)
