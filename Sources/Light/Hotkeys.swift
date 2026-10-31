@@ -47,6 +47,11 @@ final class Hotkeys: ObservableObject {
         }
         register()
     }
+    func suspend() {
+        refs.forEach { UnregisterEventHotKey($0) }
+        refs.removeAll()
+    }
+    func resume() { register() }
     func set(_ combination: KeyCombination, opening: Bool) {
         guard combination != (opening ? toggleKey : openKey) else {
             error = "Choose different shortcuts for toggling the VPN and opening Shadowrocket."
@@ -108,18 +113,20 @@ final class RecorderButton: NSButton {
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) is unavailable") }
     @objc private func beginRecording() {
+        Hotkeys.shared.suspend()
         recording = true
         title = "Press shortcut…"
         window?.makeFirstResponder(self)
     }
     override func resignFirstResponder() -> Bool {
+        if recording { Hotkeys.shared.resume() }
         recording = false
         title = savedTitle
         return super.resignFirstResponder()
     }
     override func keyDown(with event: NSEvent) {
         guard recording else { super.keyDown(with: event); return }
-        if event.keyCode == 53 { recording = false; title = savedTitle; return }
+        if event.keyCode == 53 { recording = false; title = savedTitle; Hotkeys.shared.resume(); return }
         let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
         guard !flags.intersection([.command, .control, .option]).isEmpty,
               let character = event.charactersIgnoringModifiers?.uppercased(), !character.isEmpty else { NSSound.beep(); return }
@@ -129,6 +136,7 @@ final class RecorderButton: NSButton {
             if flags.contains(flag) { modifiers |= UInt32(carbon); label += symbol }
         }
         recording = false
+        Hotkeys.shared.resume()
         onChange?(KeyCombination(keyCode: UInt32(event.keyCode), modifiers: modifiers, label: label + character))
         title = savedTitle
     }
