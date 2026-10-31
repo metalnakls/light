@@ -40,6 +40,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
 
 struct SettingsView: View {
     @ObservedObject var vpn: VPNController
+    @ObservedObject private var hotkeys = Hotkeys.shared
     @State private var selection: SettingsTab? = .connection
     @State private var history: [SettingsTab] = [.connection]
     @State private var historyIndex = 0
@@ -113,6 +114,16 @@ struct SettingsView: View {
             Text("Set up a VPN in Shadowrocket first. Light uses that existing profile and never imports your credentials.")
                 .font(.caption).foregroundStyle(.secondary)
             if let error = vpn.error { Text(error).foregroundStyle(.red).textSelection(.enabled) }
+        }
+        Section("Keyboard Shortcuts") {
+            LabeledContent("Toggle VPN") {
+                ShortcutRecorder(title: "Toggle VPN shortcut", combination: hotkeys.toggleKey) { hotkeys.set($0, opening: false) }.frame(width: 160)
+            }
+            LabeledContent("Open Shadowrocket") {
+                ShortcutRecorder(title: "Open Shadowrocket shortcut", combination: hotkeys.openKey) { hotkeys.set($0, opening: true) }.frame(width: 160)
+            }
+            Text("Click a shortcut to record a replacement. Press Escape to cancel.").font(.caption).foregroundStyle(.secondary)
+            if let error = hotkeys.error { Text(error).foregroundStyle(.red) }
         }
         Section("Controls") {
             Text("Click the dot to disconnect. Right-click it or reopen Light to return to Settings. The dot hides after macOS confirms disconnection.")

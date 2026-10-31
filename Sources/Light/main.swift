@@ -19,6 +19,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         vpn.onChange = { [weak self] in self?.updateStatus() }
         NSAppleEventManager.shared().setEventHandler(self, andSelector: #selector(handleURL(event:replyEvent:)),
             forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
+        Hotkeys.shared.onToggle = { [weak self] in self?.vpn.toggle() }
+        Hotkeys.shared.onOpen = { [weak self] in self?.vpn.openShadowrocket() }
+        Hotkeys.shared.start()
         updateStatus()
         if !UserDefaults.standard.bool(forKey: "hasOpenedSettings") { showSettings() }
     }
