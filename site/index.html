@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Light is a small macOS menu bar indicator and keyboard control for your VPN.">
+<title>light</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+:root { color-scheme: light dark; }
+body { margin: 0; min-height: 100svh; display: grid; grid-template-rows: 1fr auto 1fr; justify-items: center; align-content: center; gap: 1.25rem; background: #fff; color: #000; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+.button { grid-row: 2; align-self: end; display: inline-block; padding: .7rem 1.6rem; border-radius: 8px; background: #000; color: #fff; text-decoration: none; font-size: 16px; font-weight: 500; }
+footer { grid-row: 3; align-self: start; display: grid; justify-items: center; gap: 1rem; padding: 0 1rem 2rem; text-align: center; }
+p { margin: 0; font-size: 13px; color: #666; }
+nav { display: flex; gap: 1rem; font-size: 13px; }
+a { color: inherit; text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid #a66c00; outline-offset: 5px; }
+@media (prefers-color-scheme: dark) { body { background: #000; color: #fff; } .button { background: #fff; color: #000; } p { color: #aaa; } }
+</style>
+</head>
+<body>
+<a class="button" href="https://github.com/metalnakls/light/releases/latest/download/Light.zip" aria-label="Download Light for macOS">download</a>
+<footer>
+<p>macOS 13 or later · Apple silicon and Intel</p>
+<nav aria-label="More information"><a href="setup.html">setup</a><a href="privacy.html">privacy</a><a href="https://github.com/metalnakls/light">source</a></nav>
+</footer>
+</body>
+</html>

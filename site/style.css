@@ -1,0 +1,7 @@
+:root { color-scheme: light dark; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+body { max-width: 650px; margin: 4rem auto; padding: 0 1.5rem; line-height: 1.6; background: #fff; color: #111; }
+h1 { font-size: 1.6rem; font-weight: 600; } h2 { margin-top: 2rem; font-size: 1.1rem; }
+a { color: inherit; text-underline-offset: 3px; } a:focus-visible { outline: 2px solid #a66c00; outline-offset: 4px; }
+pre { padding: 1rem; background: #f4f4f4; border-radius: 8px; overflow-x: auto; }
+code { font-size: 12px; } kbd { font-family: inherit; font-weight: 600; }
+@media (prefers-color-scheme: dark) { body { background: #000; color: #eee; } pre { background: #1a1a1a; } }
