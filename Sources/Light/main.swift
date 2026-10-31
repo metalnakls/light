@@ -84,6 +84,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 @main
 enum LightApp {
     @MainActor static func main() {
+        // Exercise dyld and all linked frameworks without creating windows or touching the VPN.
+        if CommandLine.arguments.contains("--self-check") {
+            print("Light runtime loaded")
+            return
+        }
         let app = NSApplication.shared
         let delegate = AppDelegate()
         app.delegate = delegate

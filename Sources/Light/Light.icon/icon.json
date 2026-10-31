@@ -1,0 +1,65 @@
+{
+  "features" : [
+    "refractivity"
+  ],
+  "fill" : {
+    "automatic-gradient" : "display-p3:0.94783,0.88076,0.65693,1.00000"
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "fill" : {
+            "automatic-gradient" : "display-p3:0.96783,0.93418,0.31242,1.00000"
+          },
+          "image-name" : "1.svg",
+          "name" : "1"
+        }
+      ],
+      "refractivity" : {
+        "depth" : 0.4337109375,
+        "enabled" : true,
+        "strength" : -0.1653125
+      },
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0.4
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0
+      }
+    },
+    {
+      "blur-material" : null,
+      "layers" : [
+        {
+          "fill" : {
+            "automatic-gradient" : "display-p3:0.96783,0.94795,0.63169,1.00000"
+          },
+          "image-name" : "2.svg",
+          "name" : "2"
+        }
+      ],
+      "refractivity" : {
+        "depth" : 0,
+        "enabled" : true,
+        "strength" : 1
+      },
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0.72
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.58
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
