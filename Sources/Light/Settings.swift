@@ -3,7 +3,7 @@ import SwiftUI
 
 @MainActor
 final class SettingsWindowController: NSWindowController, NSWindowDelegate {
-    init(vpn: VPNController) {
+    init(vpn: VPNController, health: TunnelHealth) {
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 700, height: 540),
             styleMask: [.titled, .closable, .resizable, .miniaturizable, .fullSizeContentView], backing: .buffered, defer: false)
         super.init(window: window)
@@ -14,7 +14,7 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate {
         window.center()
         window.delegate = self
         window.isReleasedWhenClosed = false
-        window.contentViewController = NSHostingController(rootView: SettingsView(vpn: vpn))
+        window.contentViewController = NSHostingController(rootView: SettingsView(vpn: vpn, health: health))
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) is unavailable") }
     override func showWindow(_ sender: Any?) {
@@ -40,6 +40,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
 
 struct SettingsView: View {
     @ObservedObject var vpn: VPNController
+    @ObservedObject var health: TunnelHealth
     @ObservedObject private var hotkeys = Hotkeys.shared
     @State private var selection: SettingsTab? = .connection
     @State private var history: [SettingsTab] = [.connection]
@@ -108,12 +109,13 @@ struct SettingsView: View {
             }
             Button("Refresh Profiles") { vpn.refreshServices() }
             LabeledContent("Status", value: vpn.state.description)
+            if vpn.state == .connected { Text(health.detail).font(.caption).foregroundStyle(.secondary) }
             HStack {
                 Button(vpn.state == .connected || vpn.state == .connecting ? "Disconnect" : "Connect") { vpn.toggle() }
                     .disabled(![VPNState.connected, .connecting, .disconnected].contains(vpn.state))
                 Button("Open Shadowrocket") { vpn.openShadowrocket() }
             }
-            Text("Set up a VPN in Shadowrocket first. Light uses that existing profile and never imports your credentials.")
+            Text("Health checks contact Apple and Cloudflare through the selected VPN every 15 seconds while connected. Three failed rounds turn the indicator red. Set up a VPN in Shadowrocket first. Light uses that existing profile and never imports your credentials.")
                 .font(.caption).foregroundStyle(.secondary)
             if let error = vpn.error { Text(error).foregroundStyle(.red).textSelection(.enabled) }
         }
