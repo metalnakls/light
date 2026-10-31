@@ -109,7 +109,7 @@ final class VPNController: ObservableObject {
         guard let connection else { error = "Choose a VPN profile in Settings first."; return }
         guard requestedAt == nil else { return }
         let accepted = connected
-            ? SCNetworkConnectionStart(connection, nil, false)
+            ? SCNetworkConnectionStart(connection, nil, true)
             : SCNetworkConnectionStop(connection, true)
         guard accepted else {
             error = "macOS could not \(connected ? "connect" : "disconnect") this VPN: \(String(cString: SCErrorString(SCError())))"
