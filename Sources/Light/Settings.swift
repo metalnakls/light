@@ -41,6 +41,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
 struct SettingsView: View {
     @ObservedObject var vpn: VPNController
     @ObservedObject var health: TunnelHealth
+    @ObservedObject private var updates = Updates.shared
     @ObservedObject private var hotkeys = Hotkeys.shared
     @State private var selection: SettingsTab? = .connection
     @State private var history: [SettingsTab] = [.connection]
@@ -159,6 +160,14 @@ struct SettingsView: View {
     }
 
     @ViewBuilder private var about: some View {
+        Section("Updates") {
+            Toggle("Check for updates automatically", isOn: Binding(get: { updates.checks }, set: updates.setChecks))
+            Toggle("Download and install updates automatically", isOn: Binding(get: { updates.downloads }, set: updates.setDownloads))
+                .disabled(!updates.checks)
+            Button("Check for Updates…") { updates.check() }.disabled(!updates.canCheck)
+            Text("Updates come from Light’s GitHub releases and are verified before installation.").font(.caption).foregroundStyle(.secondary)
+            if let error = updates.error { Text(error).foregroundStyle(.red) }
+        }
         Section {
             LabeledContent("Light", value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Development")
             Text("A small light for your VPN.").foregroundStyle(.secondary)
