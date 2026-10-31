@@ -14,7 +14,8 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "Light",
-            path: "Sources/Light"
+            path: "Sources/Light",
+            exclude: ["Info.plist", "Light.icon"]
         ),
         .executableTarget(
             name: "LightCtl",
