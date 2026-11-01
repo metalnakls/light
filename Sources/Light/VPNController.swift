@@ -1,6 +1,7 @@
 import AppKit
 import SystemConfiguration
 import Combine
+import CFNetwork
 
 struct VPNService: Identifiable, Equatable {
     let id: String
@@ -121,6 +122,17 @@ final class VPNController: ObservableObject {
         requestedConnection = connected
         refresh()
         onChange?()
+    }
+
+    var healthContext: HealthContext? {
+        guard state == .connected, let connection,
+              let status = SCNetworkConnectionCopyExtendedStatus(connection) as? [String: Any],
+              let interface = (status["IPv4"] as? [String: Any])?["InterfaceName"] as? String
+                ?? (status["IPv6"] as? [String: Any])?["InterfaceName"] as? String,
+              let settings = CFNetworkCopySystemProxySettings()?.takeRetainedValue() as? [String: Any],
+              let scopes = settings["__SCOPED__"] as? [String: [String: Any]],
+              let scoped = scopes[interface], let proxy = HealthProxy(settings: scoped) else { return nil }
+        return HealthContext(serviceID: selectedID, interface: interface, proxy: proxy)
     }
 
     func openShadowrocket() {
