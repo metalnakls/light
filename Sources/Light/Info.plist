@@ -39,6 +39,7 @@
 	<string>vKl2Nb7sR021uAXfeWPvh/naGAsQuLPKh/2FsMWYkV0=</string>
 	<key>SUEnableAutomaticChecks</key><true/>
 	<key>SUAutomaticallyUpdate</key><true/>
+	<key>SUScheduledCheckInterval</key><integer>3600</integer>
 	<key>SUVerifyUpdateBeforeExtraction</key><true/>
 	<key>SURequireSignedFeed</key><true/>
 	<key>SUEnableSystemProfiling</key><false/>

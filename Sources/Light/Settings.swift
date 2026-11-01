@@ -176,7 +176,7 @@ struct SettingsView: View {
             Toggle("Download and install updates automatically", isOn: Binding(get: { updates.downloads }, set: updates.setDownloads))
                 .disabled(!updates.checks)
             Button("Check for Updates…") { updates.check() }.disabled(!updates.canCheck)
-            Text("Updates come from Light’s GitHub releases and are verified before installation.").font(.caption).foregroundStyle(.secondary)
+            Text("Checks on launch and hourly while running. Updates come from GitHub and are verified before installation.").font(.caption).foregroundStyle(.secondary)
             if let error = updates.error { Text(error).foregroundStyle(.red) }
         }
         Section {

@@ -14,8 +14,15 @@ final class Updates: ObservableObject {
 
     func start() {
         #if !DEBUG
-        do { try controller.updater.start() }
-        catch { self.error = error.localizedDescription }
+        do {
+            try controller.updater.start()
+            if controller.updater.automaticallyChecksForUpdates {
+                controller.updater.checkForUpdatesInBackground()
+            }
+        } catch {
+            self.error = error.localizedDescription
+            return
+        }
         observations = [
             controller.updater.observe(\.automaticallyChecksForUpdates, options: [.initial, .new]) { updater, _ in
                 Task { @MainActor in self.checks = updater.automaticallyChecksForUpdates }
