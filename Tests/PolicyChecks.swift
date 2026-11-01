@@ -4,6 +4,14 @@ import Carbon.HIToolbox
 @main
 struct PolicyChecks {
     @MainActor static func main() {
+        let fade = FailureTransition(from: 0, to: 1, started: 10)
+        precondition(fade.value(at: 10) == 0)
+        precondition(fade.value(at: 11) == 1)
+        let middle = fade.value(at: 10.12)
+        precondition(middle > 0 && middle < 1)
+        let interrupted = FailureTransition(from: middle, to: 0, started: 10.12)
+        precondition(interrupted.value(at: 10.12) == middle, "Recovery must continue from the current frame")
+        precondition(interrupted.value(at: 11) == 0)
         precondition(ProxyHealthClient.classify(NSError(domain: "kCFErrorDomainCFNetwork", code: 310)) == .failed)
         precondition(ProxyHealthClient.classify(NSError(domain: "kCFErrorDomainCFNetwork", code: 307)) == .inconclusive)
         precondition(ProxyHealthClient.classify(URLError(.cancelled)) == .inconclusive)

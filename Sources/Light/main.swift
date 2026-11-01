@@ -71,7 +71,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func updateStatus() {
         statusItem.isVisible = vpn.state != .disconnected && vpn.state != .unavailable
-        statusItem.button?.image = indicator.image(failed: vpn.state == .failed || health.failed, transitioning: vpn.state == .connecting || vpn.state == .disconnecting)
+        indicator.update(button: statusItem.button, failed: vpn.state == .failed || health.failed, transitioning: vpn.state == .connecting || vpn.state == .disconnecting, visible: statusItem.isVisible)
         statusItem.button?.toolTip = vpn.error ?? (vpn.state == .connected ? health.detail : vpn.state.description)
         statusItem.button?.setAccessibilityLabel("VPN: \(vpn.state.description). \(vpn.state == .connected ? health.detail : "") Click to disconnect; right-click for settings.")
     }
