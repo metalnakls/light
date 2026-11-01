@@ -12,6 +12,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
+        LoginItem.shared.start()
         Updates.shared.start()
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
@@ -83,6 +84,11 @@ enum LightApp {
         // Exercise dyld and all linked frameworks without creating windows or touching the VPN.
         if CommandLine.arguments.contains("--self-check") {
             print("Light runtime loaded")
+            return
+        }
+        if CommandLine.arguments.contains("--login-status") {
+            let login = LoginItem.shared
+            print("Launch at Login: \(login.enabled ? "enabled" : "disabled"); status=\(login.status.rawValue)")
             return
         }
         let app = NSApplication.shared

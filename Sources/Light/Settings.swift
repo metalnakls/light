@@ -41,6 +41,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
 struct SettingsView: View {
     @ObservedObject var vpn: VPNController
     @ObservedObject var health: TunnelHealth
+    @ObservedObject private var login = LoginItem.shared
     @ObservedObject private var updates = Updates.shared
     @ObservedObject private var hotkeys = Hotkeys.shared
     @State private var selection: SettingsTab? = .connection
@@ -100,6 +101,14 @@ struct SettingsView: View {
     }
 
     @ViewBuilder private var connection: some View {
+        Section("Startup") {
+            Toggle("Launch at Login", isOn: Binding(get: { login.enabled }, set: login.setEnabled))
+            if login.status == .requiresApproval {
+                Text("Allow Light in Login Items to finish enabling automatic launch.").font(.caption).foregroundStyle(.secondary)
+                Button("Open Login Items…") { login.openApprovalSettings() }
+            }
+            if let error = login.error { Text(error).foregroundStyle(.red) }
+        }
         Section("VPN") {
             Picker("Profile", selection: $vpn.selectedID) {
                 Text("Choose a profile").tag("")
