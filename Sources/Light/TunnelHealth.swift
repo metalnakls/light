@@ -153,24 +153,22 @@ final class TunnelHealth: ObservableObject {
         client?.cancel()
         client = nil
         evidence = HealthEvidence()
-        failed = false
+        publish(failed: false)
         readyAt = ProcessInfo.processInfo.systemUptime + 8
         lastStarted = -Double.infinity
-        onChange?()
     }
     func refresh() {
         guard let vpn else { return }
         let next = vpn.state == .connected ? vpn.healthContext : nil
         if next != context { context = next; reset() }
         guard vpn.state == .connected else {
-            detail = vpn.state.description
-            onChange?()
+            publish(detail: vpn.state.description)
             return
         }
-        guard !sleeping, !offline else { detail = "Health check paused while the network is unavailable."; return }
-        guard let context else { detail = "Connected; no supported local proxy is available for health checks."; return }
+        guard !sleeping, !offline else { publish(detail: "Health check paused while the network is unavailable."); return }
+        guard let context else { publish(detail: "Connected; no supported local proxy is available for health checks."); return }
         let now = ProcessInfo.processInfo.systemUptime
-        guard now >= readyAt else { detail = "Connected; waiting for the tunnel to settle…"; return }
+        guard now >= readyAt else { publish(detail: "Connected; waiting for the tunnel to settle…"); return }
         guard task == nil, now - lastStarted >= 4 else { return }
         if client == nil { client = ProxyHealthClient(proxy: context.proxy) }
         guard let client else { return }
@@ -190,13 +188,23 @@ final class TunnelHealth: ObservableObject {
             guard self.vpn?.state == .connected, self.vpn?.healthContext == context else { self.task = nil; self.refresh(); return }
             self.task = nil
             self.evidence.record(result)
-            self.failed = self.evidence.failed
+            let detail: String
             switch result {
-            case .reachable: self.detail = "HTTPS responded through the VPN’s local proxy."
-            case .failed: self.detail = self.failed ? "VPN connected, but HTTPS checks repeatedly timed out or failed through its proxy." : "A check failed; confirming before showing red…"
-            case .inconclusive: self.detail = "Connected; health check inconclusive."
+            case .reachable: detail = "HTTPS responded through the VPN’s local proxy."
+            case .failed: detail = self.evidence.failed ? "VPN connected, but HTTPS checks repeatedly timed out or failed through its proxy." : "A check failed; confirming before showing red…"
+            case .inconclusive: detail = "Connected; health check inconclusive."
             }
-            self.onChange?()
+            self.publish(failed: self.evidence.failed, detail: detail)
         }
     }
+
+    // Polling must not invalidate the settings graph when its displayed values are unchanged.
+    func publish(failed nextFailed: Bool? = nil, detail nextDetail: String? = nil) {
+        let changedFailure = nextFailed.map { $0 != failed } ?? false
+        let changedDetail = nextDetail.map { $0 != detail } ?? false
+        if changedFailure, let nextFailed { failed = nextFailed }
+        if changedDetail, let nextDetail { detail = nextDetail }
+        if changedFailure || changedDetail { onChange?() }
+    }
+
 }

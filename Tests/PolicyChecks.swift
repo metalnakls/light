@@ -1,9 +1,31 @@
 import Foundation
+import Combine
 import Carbon.HIToolbox
 
 @main
 struct PolicyChecks {
     @MainActor static func main() {
+        let vpn = VPNController(monitoring: false)
+        let health = TunnelHealth()
+        var vpnChanges = 0
+        var healthChanges = 0
+        var indicatorChanges = 0
+        let vpnToken = vpn.objectWillChange.sink { vpnChanges += 1 }
+        let healthToken = health.objectWillChange.sink { healthChanges += 1 }
+        health.onChange = { indicatorChanges += 1 }
+        for _ in 0..<100_000 {
+            vpn.refresh()
+            health.publish(failed: false, detail: "Waiting for a VPN connection.")
+        }
+        precondition(vpnChanges == 0 && healthChanges == 0 && indicatorChanges == 0,
+                     "Unchanged polls must not invalidate UI or indicator observations")
+        health.publish(failed: true, detail: "Failed")
+        precondition(health.failed && health.detail == "Failed" && indicatorChanges == 1)
+        health.publish(failed: true, detail: "Failed")
+        precondition(healthChanges == 2 && indicatorChanges == 1)
+        health.publish(failed: false, detail: "Recovered")
+        precondition(!health.failed && health.detail == "Recovered" && indicatorChanges == 2)
+        withExtendedLifetime((vpnToken, healthToken)) {}
         let fade = FailureTransition(from: 0, to: 1, started: 10)
         precondition(fade.value(at: 10) == 0)
         precondition(fade.value(at: 11) == 1)

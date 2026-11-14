@@ -39,7 +39,8 @@ final class VPNController: ObservableObject {
     private var requestedAt: Date?
     private var requestedConnection: Bool?
 
-    init() {
+    init(monitoring: Bool = true) {
+        if !monitoring { selectedID = ""; return }
         selectedID = UserDefaults.standard.string(forKey: "vpnService") ?? ""
         refreshServices()
         attach()
@@ -72,16 +73,22 @@ final class VPNController: ObservableObject {
     }
 
     func refresh() {
-        let previous = state
+        let next: VPNState
         if let connection {
             switch SCNetworkConnectionGetStatus(connection) {
-            case .disconnected: state = .disconnected
-            case .connecting: state = .connecting
-            case .connected: state = .connected
-            case .disconnecting: state = .disconnecting
-            default: state = .failed
+            case .disconnected: next = .disconnected
+            case .connecting: next = .connecting
+            case .connected: next = .connected
+            case .disconnecting: next = .disconnecting
+            default: next = .failed
             }
-        } else { state = .unavailable }
+        } else { next = .unavailable }
+        applyStatus(next)
+    }
+
+    func applyStatus(_ next: VPNState) {
+        let changed = state != next
+        if changed { state = next }
         if let requestedAt, let desired = requestedConnection {
             if (desired && state == .connected) || (!desired && state == .disconnected) {
                 self.requestedAt = nil
@@ -92,7 +99,7 @@ final class VPNController: ObservableObject {
                 requestedConnection = nil
             }
         }
-        if state != previous { onChange?() }
+        if changed { onChange?() }
     }
 
     func toggle() {

@@ -3,7 +3,12 @@ import SwiftUI
 
 @MainActor
 final class SettingsWindowController: NSWindowController, NSWindowDelegate {
+    private let vpn: VPNController
+    private let health: TunnelHealth
+
     init(vpn: VPNController, health: TunnelHealth) {
+        self.vpn = vpn
+        self.health = health
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 700, height: 540),
             styleMask: [.titled, .closable, .resizable, .miniaturizable, .fullSizeContentView], backing: .buffered, defer: false)
         super.init(window: window)
@@ -14,16 +19,26 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate {
         window.center()
         window.delegate = self
         window.isReleasedWhenClosed = false
-        window.contentViewController = NSHostingController(rootView: SettingsView(vpn: vpn, health: health))
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) is unavailable") }
+    func loadContent() {
+        guard window?.contentViewController == nil else { return }
+        window?.contentViewController = NSHostingController(rootView: SettingsView(vpn: vpn, health: health))
+    }
     override func showWindow(_ sender: Any?) {
+        loadContent()
         NSApp.setActivationPolicy(.regular)
         super.showWindow(sender)
         window?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
-    func windowWillClose(_ notification: Notification) { NSApp.setActivationPolicy(.accessory) }
+    func windowWillClose(_ notification: Notification) {
+        // Hidden hosting controllers still observe models. Release the graph on close.
+        window?.makeFirstResponder(nil)
+        window?.contentViewController = nil
+        window?.contentView = nil
+        NSApp.setActivationPolicy(.accessory)
+    }
 }
 
 enum SettingsTab: String, CaseIterable, Identifiable {
